@@ -1,0 +1,24 @@
+Configuring network-transport-tcp-0.5.1...
+Building network-transport-tcp-0.5.1...
+Preprocessing library network-transport-tcp-0.5.1...
+[1 of 2] Compiling Network.Transport.TCP.Internal ( src/Network/Transport/TCP/Internal.hs, .stack-work/dist/x86_64-linux/Cabal-1.22.5.0/build/Network/Transport/TCP/Internal.o )
+
+src/Network/Transport/TCP/Internal.hs:49:1: Warning:
+    The import of ‘Control.Applicative’ is redundant
+      except perhaps to import instances from ‘Control.Applicative’
+    To import instances alone, use: import Control.Applicative()
+[2 of 2] Compiling Network.Transport.TCP ( src/Network/Transport/TCP.hs, .stack-work/dist/x86_64-linux/Cabal-1.22.5.0/build/Network/Transport/TCP.o )
+
+src/Network/Transport/TCP.hs:111:1: Warning:
+    The import of ‘Control.Applicative’ is redundant
+      except perhaps to import instances from ‘Control.Applicative’
+    To import instances alone, use: import Control.Applicative()
+
+src/Network/Transport/TCP.hs:148:1: Warning:
+    The import of ‘Data.Traversable’ is redundant
+      except perhaps to import instances from ‘Data.Traversable’
+    To import instances alone, use: import Data.Traversable()
+In-place registering network-transport-tcp-0.5.1...
+Installing library in
+/home/jibin/.stack/snapshots/x86_64-linux/lts-6.3/7.10.3/lib/x86_64-linux-ghc-7.10.3/network-transport-tcp-0.5.1-5KJL0TtcAS0C4E58DKU8Xb
+Registering network-transport-tcp-0.5.1...

@@ -1,0 +1,43 @@
+Configuring lens-family-1.2.0...
+Building lens-family-1.2.0...
+Preprocessing library lens-family-1.2.0...
+[1 of 6] Compiling Lens.Family2.Unchecked ( src/Lens/Family2/Unchecked.hs, .stack-work/dist/x86_64-linux/Cabal-1.22.5.0/build/Lens/Family2/Unchecked.o )
+
+src/Lens/Family2/Unchecked.hs:91:1: Warning:
+    The import of ‘Control.Applicative’ is redundant
+      except perhaps to import instances from ‘Control.Applicative’
+    To import instances alone, use: import Control.Applicative()
+[2 of 6] Compiling Lens.Family2     ( src/Lens/Family2.hs, .stack-work/dist/x86_64-linux/Cabal-1.22.5.0/build/Lens/Family2.o )
+
+src/Lens/Family2.hs:104:1: Warning:
+    The import of ‘Control.Applicative’ is redundant
+      except perhaps to import instances from ‘Control.Applicative’
+    To import instances alone, use: import Control.Applicative()
+
+src/Lens/Family2.hs:105:1: Warning:
+    The import of ‘Data.Foldable’ is redundant
+      except perhaps to import instances from ‘Data.Foldable’
+    To import instances alone, use: import Data.Foldable()
+
+src/Lens/Family2.hs:106:1: Warning:
+    The import of ‘Data.Monoid’ is redundant
+      except perhaps to import instances from ‘Data.Monoid’
+    To import instances alone, use: import Data.Monoid()
+[3 of 6] Compiling Lens.Family2.Stock ( src/Lens/Family2/Stock.hs, .stack-work/dist/x86_64-linux/Cabal-1.22.5.0/build/Lens/Family2/Stock.o )
+[4 of 6] Compiling Lens.Family2.State.Lazy ( src/Lens/Family2/State/Lazy.hs, .stack-work/dist/x86_64-linux/Cabal-1.22.5.0/build/Lens/Family2/State/Lazy.o )
+
+src/Lens/Family2/State/Lazy.hs:27:1: Warning:
+    The import of ‘Data.Monoid’ is redundant
+      except perhaps to import instances from ‘Data.Monoid’
+    To import instances alone, use: import Data.Monoid()
+[5 of 6] Compiling Lens.Family2.State ( src/Lens/Family2/State.hs, .stack-work/dist/x86_64-linux/Cabal-1.22.5.0/build/Lens/Family2/State.o )
+[6 of 6] Compiling Lens.Family2.State.Strict ( src/Lens/Family2/State/Strict.hs, .stack-work/dist/x86_64-linux/Cabal-1.22.5.0/build/Lens/Family2/State/Strict.o )
+
+src/Lens/Family2/State/Strict.hs:27:1: Warning:
+    The import of ‘Data.Monoid’ is redundant
+      except perhaps to import instances from ‘Data.Monoid’
+    To import instances alone, use: import Data.Monoid()
+In-place registering lens-family-1.2.0...
+Installing library in
+/home/jibin/.stack/snapshots/x86_64-linux/lts-6.3/7.10.3/lib/x86_64-linux-ghc-7.10.3/lens-family-1.2.0-DxUroOa1tyI1QWPTm2hJhA
+Registering lens-family-1.2.0...

@@ -1,0 +1,17 @@
+Configuring docopt-0.7.0.4...
+Building docopt-0.7.0.4...
+Preprocessing library docopt-0.7.0.4...
+[ 1 of 10] Compiling System.Console.Docopt.ApplicativeParsec ( System/Console/Docopt/ApplicativeParsec.hs, .stack-work/dist/x86_64-linux/Cabal-1.22.5.0/build/System/Console/Docopt/ApplicativeParsec.o )
+[ 2 of 10] Compiling System.Console.Docopt.ParseUtils ( System/Console/Docopt/ParseUtils.hs, .stack-work/dist/x86_64-linux/Cabal-1.22.5.0/build/System/Console/Docopt/ParseUtils.o )
+[ 3 of 10] Compiling System.Console.Docopt.Types ( System/Console/Docopt/Types.hs, .stack-work/dist/x86_64-linux/Cabal-1.22.5.0/build/System/Console/Docopt/Types.o )
+[ 4 of 10] Compiling System.Console.Docopt.UsageParse ( System/Console/Docopt/UsageParse.hs, .stack-work/dist/x86_64-linux/Cabal-1.22.5.0/build/System/Console/Docopt/UsageParse.o )
+[ 5 of 10] Compiling System.Console.Docopt.OptParse ( System/Console/Docopt/OptParse.hs, .stack-work/dist/x86_64-linux/Cabal-1.22.5.0/build/System/Console/Docopt/OptParse.o )
+[ 6 of 10] Compiling System.Console.Docopt.QQ.Instances ( System/Console/Docopt/QQ/Instances.hs, .stack-work/dist/x86_64-linux/Cabal-1.22.5.0/build/System/Console/Docopt/QQ/Instances.o )
+[ 7 of 10] Compiling System.Console.Docopt.QQ ( System/Console/Docopt/QQ.hs, .stack-work/dist/x86_64-linux/Cabal-1.22.5.0/build/System/Console/Docopt/QQ.o )
+[ 8 of 10] Compiling System.Console.Docopt.Public ( System/Console/Docopt/Public.hs, .stack-work/dist/x86_64-linux/Cabal-1.22.5.0/build/System/Console/Docopt/Public.o )
+[ 9 of 10] Compiling System.Console.Docopt ( System/Console/Docopt.hs, .stack-work/dist/x86_64-linux/Cabal-1.22.5.0/build/System/Console/Docopt.o )
+[10 of 10] Compiling System.Console.Docopt.NoTH ( System/Console/Docopt/NoTH.hs, .stack-work/dist/x86_64-linux/Cabal-1.22.5.0/build/System/Console/Docopt/NoTH.o )
+In-place registering docopt-0.7.0.4...
+Installing library in
+/home/jibin/.stack/snapshots/x86_64-linux/lts-6.3/7.10.3/lib/x86_64-linux-ghc-7.10.3/docopt-0.7.0.4-D0EnsA84mWLBJrices3Luv
+Registering docopt-0.7.0.4...

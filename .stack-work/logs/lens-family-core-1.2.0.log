@@ -1,0 +1,69 @@
+Configuring lens-family-core-1.2.0...
+Building lens-family-core-1.2.0...
+Preprocessing library lens-family-core-1.2.0...
+[ 1 of 10] Compiling Lens.Family.State.Zoom ( src/Lens/Family/State/Zoom.hs, .stack-work/dist/x86_64-linux/Cabal-1.22.5.0/build/Lens/Family/State/Zoom.o )
+
+src/Lens/Family/State/Zoom.hs:3:1: Warning:
+    The import of ‘Control.Applicative’ is redundant
+      except perhaps to import instances from ‘Control.Applicative’
+    To import instances alone, use: import Control.Applicative()
+
+src/Lens/Family/State/Zoom.hs:5:1: Warning:
+    The import of ‘Data.Monoid’ is redundant
+      except perhaps to import instances from ‘Data.Monoid’
+    To import instances alone, use: import Data.Monoid()
+[ 2 of 10] Compiling Lens.Family.Phantom ( src/Lens/Family/Phantom.hs, .stack-work/dist/x86_64-linux/Cabal-1.22.5.0/build/Lens/Family/Phantom.o )
+[ 3 of 10] Compiling Lens.Family.Identical ( src/Lens/Family/Identical.hs, .stack-work/dist/x86_64-linux/Cabal-1.22.5.0/build/Lens/Family/Identical.o )
+
+src/Lens/Family/Identical.hs:3:1: Warning:
+    The import of ‘Control.Applicative’ is redundant
+      except perhaps to import instances from ‘Control.Applicative’
+    To import instances alone, use: import Control.Applicative()
+[ 4 of 10] Compiling Lens.Family.Unchecked ( src/Lens/Family/Unchecked.hs, .stack-work/dist/x86_64-linux/Cabal-1.22.5.0/build/Lens/Family/Unchecked.o )
+
+src/Lens/Family/Unchecked.hs:85:1: Warning:
+    The import of ‘Control.Applicative’ is redundant
+      except perhaps to import instances from ‘Control.Applicative’
+    To import instances alone, use: import Control.Applicative()
+[ 5 of 10] Compiling Lens.Family      ( src/Lens/Family.hs, .stack-work/dist/x86_64-linux/Cabal-1.22.5.0/build/Lens/Family.o )
+
+src/Lens/Family.hs:98:1: Warning:
+    The import of ‘Control.Applicative’ is redundant
+      except perhaps to import instances from ‘Control.Applicative’
+    To import instances alone, use: import Control.Applicative()
+
+src/Lens/Family.hs:100:1: Warning:
+    The import of ‘Foldable’ from module ‘Data.Foldable’ is redundant
+
+src/Lens/Family.hs:103:1: Warning:
+    The import of ‘mappend, Monoid’
+    from module ‘Data.Monoid’ is redundant
+[ 6 of 10] Compiling Lens.Family.State.Lazy ( src/Lens/Family/State/Lazy.hs, .stack-work/dist/x86_64-linux/Cabal-1.22.5.0/build/Lens/Family/State/Lazy.o )
+
+src/Lens/Family/State/Lazy.hs:26:1: Warning:
+    The import of ‘Data.Monoid’ is redundant
+      except perhaps to import instances from ‘Data.Monoid’
+    To import instances alone, use: import Data.Monoid()
+[ 7 of 10] Compiling Lens.Family.State ( src/Lens/Family/State.hs, .stack-work/dist/x86_64-linux/Cabal-1.22.5.0/build/Lens/Family/State.o )
+[ 8 of 10] Compiling Lens.Family.State.Strict ( src/Lens/Family/State/Strict.hs, .stack-work/dist/x86_64-linux/Cabal-1.22.5.0/build/Lens/Family/State/Strict.o )
+
+src/Lens/Family/State/Strict.hs:26:1: Warning:
+    The import of ‘Data.Monoid’ is redundant
+      except perhaps to import instances from ‘Data.Monoid’
+    To import instances alone, use: import Data.Monoid()
+[ 9 of 10] Compiling Lens.Family.Clone ( src/Lens/Family/Clone.hs, .stack-work/dist/x86_64-linux/Cabal-1.22.5.0/build/Lens/Family/Clone.o )
+
+src/Lens/Family/Clone.hs:45:1: Warning:
+    The import of ‘Control.Applicative’ is redundant
+      except perhaps to import instances from ‘Control.Applicative’
+    To import instances alone, use: import Control.Applicative()
+[10 of 10] Compiling Lens.Family.Stock ( src/Lens/Family/Stock.hs, .stack-work/dist/x86_64-linux/Cabal-1.22.5.0/build/Lens/Family/Stock.o )
+
+src/Lens/Family/Stock.hs:29:1: Warning:
+    The import of ‘Control.Applicative’ is redundant
+      except perhaps to import instances from ‘Control.Applicative’
+    To import instances alone, use: import Control.Applicative()
+In-place registering lens-family-core-1.2.0...
+Installing library in
+/home/jibin/.stack/snapshots/x86_64-linux/lts-6.3/7.10.3/lib/x86_64-linux-ghc-7.10.3/lens-family-core-1.2.0-LQ7DCtblN7DKcZtnPnMCbu
+Registering lens-family-core-1.2.0...
