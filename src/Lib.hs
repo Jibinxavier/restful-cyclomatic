@@ -18,36 +18,58 @@ module Lib
     ) where
 
 -- These imports are required for Cloud Haskell
-import           Control.Distributed.Process
-import           Control.Distributed.Process.Backend.SimpleLocalnet
-import           Control.Distributed.Process.Closure
-import           Control.Distributed.Process.Node                   (initRemoteTable)
-import           Control.Monad
-import           Network.Transport.TCP                              (createTransport,
-                                                                     defaultTCPParameters)
-import           PrimeFactors
-import           System.Environment                                 (getArgs)
-import           System.Exit
-import           Data.List
-import           System.Directory
-
+import        Control.Distributed.Process
+import        Control.Distributed.Process.Backend.SimpleLocalnet
+import        Control.Distributed.Process.Closure
+import        Control.Distributed.Process.Node                   (initRemoteTable)
+import        Control.Monad
+import        Network.Transport.TCP                              (createTransport, defaultTCPParameters)
+import        PrimeFactors
+import        System.Environment                                 (getArgs)
+import        System.Exit
+import        Data.List
+import        System.Directory                                   (doesDirectoryExist)
+import        System.Process
+import        System.IO          
+import        Data.List.Split                         
 -- this is the work we get workers to do. It could be anything we want. To keep things simple, we'll calculate the
 -- number of prime factors for the integer passed.
 
 
-import qualified Data.ByteString as B
-import Network.HTTP
-import Network.URI (parseURI)
-test :: IO ()
-test  = do
-    jpg <- get "https://github.com/rubik/argon/archive/master.zip"
-    B.writeFile "master.zip" jpg
-  where
-    get url = let uri = case parseURI url of
-                          Nothing -> error $ "Invalid URI: " ++ url
-                          Just u -> u in
-              simpleHTTP (defaultGETRequest_ uri) >>= getResponseBody
+import        qualified Data.ByteString as B
+import        qualified Data.ByteString.Lazy as L
 
+import        Codec.Archive.Zip (extractFiles, withArchive, entryNames)
+import        Network.HTTP.Conduit
+import        Network.URI (parseURI)
+
+cloneRepo :: String -> IO()
+cloneRepo url = do 
+  let repo = last $ splitOn "/" url
+  exists <- liftIO $ doesDirectoryExist ("/tmp/" ++ repo)
+  case exists of 
+    False -> do 
+      liftIO $ createProcess (shell $ "/usr/bin/git clone " ++ url ++ " /tmp/" ++ repo ){ std_out = CreatePipe }
+      liftIO $ putStrLn "Cloning complete"
+      
+    otherwise -> do 
+      liftIO $ putStrLn "Repository was cloned"
+       
+
+
+downloadFile :: String -> IO (Bool)
+downloadFile url  = do
+    jpg <- get url
+    L.writeFile "master.zip" jpg
+    return True 
+  where
+    get url = case parseURI url of
+                Nothing -> error $ "Invalid URI: " ++ url
+                Just _ ->  simpleHttp url   
+unzipF :: String -> String -> IO()
+unzipF fname dirPath=  withArchive fname $ do
+    names <- entryNames
+    extractFiles names dirPath
     
 doWork :: Integer -> Integer
 doWork = numPrimeFactors
@@ -132,9 +154,12 @@ rtable = Lib.__remoteTable initRemoteTable
 -- here.
 someFunc :: IO ()
 someFunc = do
-  all <- getDirectoryContents "/home/jibin/workspace/new_Disributed/restful-cyclomatic"
-  print all
-   
+  --all <- getDirectoryContents "/home/jibin/workspace/new_Disributed/restful-cyclomatic" 
+  liftIO $ cloneRepo "https://github.com/rubik/argon.git"
+  m <- downloadFile "https://github.com/rubik/argon/archive/master.zip"
+
+  do 
+    unzipF "./master" "."
   args <- getArgs
 
   case args of
