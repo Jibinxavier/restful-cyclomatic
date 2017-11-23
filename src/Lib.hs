@@ -42,6 +42,7 @@ import        qualified Data.ByteString.Lazy as L
 import        Codec.Archive.Zip (extractFiles, withArchive, entryNames)
 import        Network.HTTP.Conduit
 import        Network.URI (parseURI)
+import        Argon
 
 cloneRepo :: String -> IO()
 cloneRepo url = do 
@@ -54,7 +55,17 @@ cloneRepo url = do
       
     otherwise -> do 
       liftIO $ putStrLn "Repository was cloned"
-       
+
+calcCyclomat :: String -> IO (Bool)
+calcCyclomat filePath  = do 
+  let config = (Config 6 [] [] [] Colored) 
+     
+  
+  (re, output) <- analyze config filePath
+
+  liftIO $ putStrLn $ "here"
+  liftIO $ putStrLn $ "complexity" ++  show output
+  return True
 
 
 downloadFile :: String -> IO (Bool)
@@ -156,6 +167,7 @@ someFunc :: IO ()
 someFunc = do
   --all <- getDirectoryContents "/home/jibin/workspace/new_Disributed/restful-cyclomatic" 
   liftIO $ cloneRepo "https://github.com/rubik/argon.git"
+  l <-calcCyclomat "/tmp/argon.git/src/Argon/Parser.hs"
   m <- downloadFile "https://github.com/rubik/argon/archive/master.zip"
 
   do 
