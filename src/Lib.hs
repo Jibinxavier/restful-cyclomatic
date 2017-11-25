@@ -70,7 +70,7 @@ listFilesDirFiltered dir = do
 
 
 getAllCommits :: String -> IO([String])
-getAllCommits folder= do 
+getAllCommits folder= do   
   (_, Just hout, _, _) <-createProcess (shell $ "cd "++ folder ++ "&&" ++"/usr/bin/git rev-list HEAD" ){ std_out = CreatePipe }
   commits <- hGetContents hout
  
