@@ -28,10 +28,12 @@ import        PrimeFactors
 import        System.Environment                                 (getArgs)
 import        System.Exit
 import        Data.List
-import        System.Directory                                   (doesDirectoryExist)
+import        System.Directory                                  -- (doesDirectoryExist,getDirectoryContents)
 import        System.Process
 import        System.IO          
-import        Data.List.Split                         
+import        Data.List.Split       
+import        System.FilePath
+import        System.Posix.Files                  
 -- this is the work we get workers to do. It could be anything we want. To keep things simple, we'll calculate the
 -- number of prime factors for the integer passed.
 
@@ -43,7 +45,39 @@ import        Codec.Archive.Zip (extractFiles, withArchive, entryNames)
 import        Network.HTTP.Conduit
 import        Network.URI (parseURI)
 import        Argon
+import        Data.Either  
 
+
+import Data.Traversable (traverse)
+import System.Directory.Tree (
+    AnchoredDirTree(..), DirTree(..),
+    filterDir, readDirectoryWith
+    )
+import System.FilePath (takeExtension)
+
+test (DirTree m) = m
+listFilesDirQFiltered :: String -> IO ([DirTree FilePath])
+listFilesDirFiltered dir = do
+  _:/tree <- readDirectoryWith return dir
+  return $ traverse  (:[])  $ (filterDir myPred tree)
+ 
+   
+  --return ()
+  where myPred (Dir ('.':_) _) = False
+        myPred (File n _) = takeExtension n  == ".hs"
+        myPred _ = True
+
+
+traverseDir :: FilePath -> (FilePath -> Bool) -> IO [FilePath]
+traverseDir top exclude = do
+  ds <- getDirectoryContents top
+  paths <- forM (filter (not.exclude) ds) $ \d -> do
+    let path = top </> d
+    s <- getFileStatus path
+    if isDirectory s
+      then traverseDir path exclude
+      else return [path]
+  return (concat paths)
 cloneRepo :: String -> IO()
 cloneRepo url = do 
   let repo = last $ splitOn "/" url
@@ -54,18 +88,26 @@ cloneRepo url = do
       liftIO $ putStrLn "Cloning complete"
       
     otherwise -> do 
-      liftIO $ putStrLn "Repository was cloned"
+      liftIO $ putStrLn "Repository was already cloned"
+ 
 
-calcCyclomat :: String -> IO (Bool)
+calcCyclomat :: String -> IO (Float)
 calcCyclomat filePath  = do 
   let config = (Config 6 [] [] [] Colored) 
      
   
-  (re, output) <- analyze config filePath
+  (_, output) <- analyze config filePath
 
-  liftIO $ putStrLn $ "here"
-  liftIO $ putStrLn $ "complexity" ++  show output
-  return True
+  case output of 
+    (Left _) -> return 0
+    (Right results) ->
+      let sum1= (sum (map (\(CC (_, _, x)) -> x) results) ) 
+          len = length results
+          avg = fromIntegral sum1/ fromIntegral len   
+      in return avg
+ 
+  --liftIO $ putStrLn $ "complexity" ++  show avg
+  
 
 
 downloadFile :: String -> IO (Bool)
@@ -168,8 +210,14 @@ someFunc = do
   --all <- getDirectoryContents "/home/jibin/workspace/new_Disributed/restful-cyclomatic" 
   liftIO $ cloneRepo "https://github.com/rubik/argon.git"
   l <-calcCyclomat "/tmp/argon.git/src/Argon/Parser.hs"
-  m <- downloadFile "https://github.com/rubik/argon/archive/master.zip"
-
+  putStrLn $ "Result " ++ show l 
+  res <- traverseDir "/tmp/argon.git/" (not.isPrefixOf ".hs")
+  --liftIO $ listFilesDirFiltered "/tmp/argon.git" -- (isPrefixOf ".hs")
+  putStrLn $ "Result " ++ show res
+  res <-  listFilesDirFiltered "/tmp/argon.git"
+  let b = map (\(DirTree file) -> file) res
+  putStrLn $ b
+  print res
   do 
     unzipF "./master" "."
   args <- getArgs

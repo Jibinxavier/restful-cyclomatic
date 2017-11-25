@@ -29,6 +29,9 @@ library
                      , zip-conduit
                      , process
                      , split
+                     , filepath
+                     , directory-tree
+                     , unix
 
   default-language:    Haskell2010
 
