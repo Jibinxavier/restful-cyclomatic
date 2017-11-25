@@ -51,18 +51,19 @@ import        Data.Either
 import Data.Traversable (traverse)
 import System.Directory.Tree (
     AnchoredDirTree(..), DirTree(..),
-    filterDir, readDirectoryWith
+    filterDir, readDirectoryWith, zipPaths, flattenDir
     )
 import System.FilePath (takeExtension)
 
-test (DirTree m) = m
-listFilesDirQFiltered :: String -> IO ([DirTree FilePath])
+
+--listFilesDirFiltered :: String -> IO ([DirTree FilePath])
 listFilesDirFiltered dir = do
   _:/tree <- readDirectoryWith return dir
-  return $ traverse  (:[])  $ (filterDir myPred tree)
- 
+  let res = flattenDir (filterDir myPred tree)
+  return [ x | x@(File _ _) <- res ]
    
-  --return ()
+   
+  --return ()do
   where myPred (Dir ('.':_) _) = False
         myPred (File n _) = takeExtension n  == ".hs"
         myPred _ = True
@@ -212,12 +213,9 @@ someFunc = do
   l <-calcCyclomat "/tmp/argon.git/src/Argon/Parser.hs"
   putStrLn $ "Result " ++ show l 
   res <- traverseDir "/tmp/argon.git/" (not.isPrefixOf ".hs")
-  --liftIO $ listFilesDirFiltered "/tmp/argon.git" -- (isPrefixOf ".hs")
-  putStrLn $ "Result " ++ show res
-  res <-  listFilesDirFiltered "/tmp/argon.git"
-  let b = map (\(DirTree file) -> file) res
-  putStrLn $ b
-  print res
+  res <- listFilesDirFiltered "/tmp/argon.git" -- (isPrefixOf ".hs")
+  putStrLn $ "Result " ++ show res ++ "\n "
+  
   do 
     unzipF "./master" "."
   args <- getArgs
