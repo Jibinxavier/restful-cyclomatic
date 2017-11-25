@@ -68,17 +68,6 @@ listFilesDirFiltered dir = do
         myPred (File n _) = takeExtension n  == ".hs"
         myPred _ = True
 
-
-traverseDir :: FilePath -> (FilePath -> Bool) -> IO [FilePath]
-traverseDir top exclude = do
-  ds <- getDirectoryContents top
-  paths <- forM (filter (not.exclude) ds) $ \d -> do
-    let path = top </> d
-    s <- getFileStatus path
-    if isDirectory s
-      then traverseDir path exclude
-      else return [path]
-  return (concat paths)
 cloneRepo :: String -> IO()
 cloneRepo url = do 
   let repo = last $ splitOn "/" url
