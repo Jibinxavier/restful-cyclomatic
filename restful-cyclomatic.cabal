@@ -32,6 +32,11 @@ library
                      , filepath
                      , directory-tree
                      , unix
+                     , bson-generic
+                     , aeson
+                     , mongoDB
+                     , text
+                     , resourcet 
 
   default-language:    Haskell2010
 

@@ -1,6 +1,7 @@
 
 {-# LANGUAGE BangPatterns    #-}
 {-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE FlexibleContexts #-}
 --{-# CPP #-}
 
 -- | use-haskell
@@ -25,7 +26,7 @@ import        Control.Distributed.Process.Node                   (initRemoteTabl
 import        Control.Monad
 import        Network.Transport.TCP                              (createTransport, defaultTCPParameters)
 import        PrimeFactors
-import        System.Environment                                 (getArgs)
+import        System.Environment                                 (getArgs,lookupEnv)
 import        System.Exit
 import        Data.List
 import        System.Directory                                  -- (doesDirectoryExist,getDirectoryContents)
@@ -39,15 +40,18 @@ import        System.Posix.Files
 
 
 import        qualified Data.ByteString as B
-import        qualified Data.ByteString.Lazy as L
+import        qualified Data.ByteString.Lazy as L 
 
 import        Codec.Archive.Zip (extractFiles, withArchive, entryNames)
-import        Network.HTTP.Conduit
+-- import        Network.HTTP.Conduit
 import        Network.URI (parseURI)
 import        Argon
-import        Data.Either  
-
-
+import        Data.Text                    (pack, unpack)
+import        Control.Monad.Trans.Resource  
+import qualified Data.ByteString.Lazy         as L
+import        Database.MongoDB   
+import        Data.Aeson.TH
+import        Data.Bson.Generic 
 import Data.Traversable (traverse)
 import System.Directory.Tree (
     AnchoredDirTree(..), DirTree(..),
@@ -68,6 +72,11 @@ listFilesDirFiltered dir = do
         myPred (File n _) = takeExtension n  == ".hs"
         myPred _ = True
 
+
+getAllCommits folder= do 
+  -- awk command to get all commits (assumes the hashes are normally 40 chars)
+  (_, Just hout, _, _) <-createProcess (shell $ "cd "++ folder ++ "&&" ++"/usr/bin/git rev-list HEAD" ){ std_out = CreatePipe }  
+  return hout
 cloneRepo :: String -> IO()
 cloneRepo url = do 
   let repo = last $ splitOn "/" url
@@ -100,19 +109,19 @@ calcCyclomat filePath  = do
   
 
 
-downloadFile :: String -> IO (Bool)
-downloadFile url  = do
-    jpg <- get url
-    L.writeFile "master.zip" jpg
-    return True 
-  where
-    get url = case parseURI url of
-                Nothing -> error $ "Invalid URI: " ++ url
-                Just _ ->  simpleHttp url   
-unzipF :: String -> String -> IO()
-unzipF fname dirPath=  withArchive fname $ do
-    names <- entryNames
-    extractFiles names dirPath
+-- downloadFile :: String -> IO (Bool)
+-- downloadFile url  = do
+--     jpg <- get url
+--     L.writeFile "master.zip" jpg
+--     return True 
+--   where
+--     get url = case parseURI url of
+--                 Nothing -> error $ "Invalid URI: " ++ url
+--                 Just _ ->  simpleHttp url   
+-- unzipF :: String -> String -> IO()
+-- unzipF fname dirPath=  withArchive fname $ do
+--     names <- entryNames
+--     extractFiles names dirPath
     
 doWork :: Integer -> Integer
 doWork = numPrimeFactors
@@ -201,11 +210,10 @@ someFunc = do
   liftIO $ cloneRepo "https://github.com/rubik/argon.git"
   l <-calcCyclomat "/tmp/argon.git/src/Argon/Parser.hs"
   putStrLn $ "Result " ++ show l  
-  res <- listFilesDirFiltered "/tmp/argon.git" -- (isPrefixOf ".hs")
+  res <- listFilesDirFiltered "/tmp/argon.git" 
   putStrLn $ "Result " ++ show res ++ "\n "
   
-  do 
-    unzipF "./master" "."
+  
   args <- getArgs
 
   case args of
@@ -231,3 +239,53 @@ someFunc = do
   --   _ <- spawnLocal $ sampleTask (1 :: Int, "using spawnLocal")
   --   pid <- spawn us $ $(mkClosure 'sampleTask) (1 :: Int, "using spawn")
   --   liftIO $ threadDelay 2000000
+
+
+ 
+withMongoDbConnection :: Action IO a -> IO a
+withMongoDbConnection act  = do
+  ip <- mongoDbIp
+  port <- mongoDbPort
+  database <- mongoDbDatabase
+  pipe <- connect (host ip)
+  ret <- runResourceT $ liftIO $ access pipe master (pack database) act
+  close pipe
+  return ret
+
+-- | helper method to ensure we force extraction of all results
+-- note how it is defined recursively - meaning that draincursor' calls itself.
+-- the purpose is to iterate through all documents returned if the connection is
+-- returning the documents in batch mode, meaning in batches of retruned results with more
+-- to come on each call. The function recurses until there are no results left, building an
+-- array of returned [Document]
+mongoDbIp :: IO String
+mongoDbIp = defEnv "MONGODB_IP" id "localhost" True
+
+-- | The port number of the mongoDB database that devnostics-rest uses to store and access data
+mongoDbPort :: IO Integer
+mongoDbPort = defEnv "MONGODB_PORT" read 27017 False -- 27017 is the default mongodb port
+
+-- | The name of the mongoDB database that devnostics-rest uses to store and access data
+mongoDbDatabase :: IO String
+mongoDbDatabase = defEnv "MONGODB_DATABASE" id "USEHASKELLDB" True
+
+drainCursor :: Cursor -> Action IO [Document]
+drainCursor cur = drainCursor' cur []
+  where
+    drainCursor' cur res  = do
+      batch <- nextBatch cur
+      if null batch
+        then return res
+        else drainCursor' cur (res ++ batch)
+defEnv :: Show a
+              => String        -- Environment Variable name
+              -> (String -> a)  -- function to process variable string (set as 'id' if not needed)
+              -> a             -- default value to use if environment variable is not set
+              -> Bool          -- True if we should warn if environment variable is not set
+              -> IO a
+defEnv env fn def doWarn = lookupEnv env >>= \ e -> case e of
+  Just s  -> return $ fn s
+  Nothing -> do
+    when doWarn (putStrLn $ "Environment variable: " ++ env ++
+                                  " is not set. Defaulting to " ++ (show def))
+    return def
