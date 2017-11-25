@@ -69,10 +69,12 @@ listFilesDirFiltered dir = do
         myPred _ = True
 
 
+getAllCommits :: String -> IO([String])
 getAllCommits folder= do 
-  -- awk command to get all commits (assumes the hashes are normally 40 chars)
-  (_, Just hout, _, _) <-createProcess (shell $ "cd "++ folder ++ "&&" ++"/usr/bin/git rev-list HEAD" ){ std_out = CreatePipe }  
-  return hout
+  (_, Just hout, _, _) <-createProcess (shell $ "cd "++ folder ++ "&&" ++"/usr/bin/git rev-list HEAD" ){ std_out = CreatePipe }
+  commits <- hGetContents hout
+ 
+  return $ filter (""/=) (splitOn "\n" commits)
 cloneRepo :: String -> IO()
 cloneRepo url = do 
   let repo = last $ splitOn "/" url
@@ -208,7 +210,8 @@ someFunc = do
   putStrLn $ "Result " ++ show l  
   res <- listFilesDirFiltered "/tmp/argon.git" 
   putStrLn $ "Result " ++ show res ++ "\n "
-  
+  res <- getAllCommits "/tmp/argon.git" 
+  putStrLn $ "Result " ++ show res ++ "\n "
   
   args <- getArgs
 
