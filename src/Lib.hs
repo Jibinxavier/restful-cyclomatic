@@ -56,7 +56,7 @@ import System.Directory.Tree (
 import System.FilePath (takeExtension)
 
 
---listFilesDirFiltered :: String -> IO ([DirTree FilePath])
+listFilesDirFiltered :: String -> IO ([DirTree FilePath])
 listFilesDirFiltered dir = do
   _:/tree <- readDirectoryWith return dir
   let res = flattenDir (filterDir myPred tree)
@@ -200,8 +200,7 @@ someFunc = do
   --all <- getDirectoryContents "/home/jibin/workspace/new_Disributed/restful-cyclomatic" 
   liftIO $ cloneRepo "https://github.com/rubik/argon.git"
   l <-calcCyclomat "/tmp/argon.git/src/Argon/Parser.hs"
-  putStrLn $ "Result " ++ show l 
-  res <- traverseDir "/tmp/argon.git/" (not.isPrefixOf ".hs")
+  putStrLn $ "Result " ++ show l  
   res <- listFilesDirFiltered "/tmp/argon.git" -- (isPrefixOf ".hs")
   putStrLn $ "Result " ++ show res ++ "\n "
   
