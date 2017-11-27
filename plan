@@ -1,2 +1,3 @@
 - need a to implement mechanism to check if the results for all files came back
-- 
+-  uncommentcalcCyclomat fpath
+- fix sequencing issue inworkers
