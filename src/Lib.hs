@@ -56,44 +56,55 @@ import System.Directory.Tree (
 import System.FilePath (takeExtension)
 
 
-listFilesDirFiltered :: String -> IO ([DirTree FilePath])
+listFilesDirFiltered :: String -> Process ([DirTree FilePath])
 listFilesDirFiltered dir = do
-  _:/tree <- readDirectoryWith return dir
+  _:/tree <- liftIO $ readDirectoryWith return dir
   let res = flattenDir (filterDir myPred tree)
-  return [ x | x@(File _ _) <- res ]  -- removing all Dir data types as they are empty
-   
-   
-  --return ()do
+      m = [ x | x@(File _ _) <- res ]
+  return  m   -- removing all Dir data types as they are empty 
   where myPred (Dir ('.':_) _) = False
         myPred (File n _) = takeExtension n  == ".hs"
         myPred _ = True
 
 
-getAllCommits :: String -> IO([String])
-getAllCommits folder= do   
-  (_, Just hout, _, _) <-createProcess (shell $ "cd "++ folder ++ "&&" ++"/usr/bin/git rev-list HEAD" ){ std_out = CreatePipe }
-  commits <- hGetContents hout
- 
-  return $ filter (""/=) (splitOn "\n" commits)
-cloneRepo :: String -> IO()
-cloneRepo url = do 
+gitCheckout :: String -> String -> Process()
+gitCheckout folder commit = do
+  liftIO $! putStrLn $ commit
+  liftIO $ createProcess (shell $ "echo here && cd "++ folder ++ "&&" ++"/usr/bin/git checkout " ++ commit ){ std_out = CreatePipe }
+  return ()
+getAllCommits :: String -> Process([String])
+getAllCommits url = do   
   let repo = last $ splitOn "/" url
-  exists <- liftIO $ doesDirectoryExist ("/tmp/" ++ repo)
+      folder = "/tmp/" ++ repo 
+      cloneCmd = "/usr/bin/git clone " ++ url ++ " "++folder ++ "&& echo end"
+      commitsCmd = " cd "++ folder ++ "&&" ++"/usr/bin/git rev-list HEAD" 
+  exists <- liftIO $ doesDirectoryExist folder
   case exists of 
+    True -> do 
+      liftIO $ putStrLn $ "cloning complete getting commits"  ++  show folder
+      (_, Just hout, _, _) <- liftIO $ createProcess (shell $ commitsCmd ){ std_out = CreatePipe }
+      commits <- liftIO $ hGetContents hout
+      return $ filter (""/=) (splitOn "\n" commits)
+     
     False -> do 
-      liftIO $ createProcess (shell $ "/usr/bin/git clone " ++ url ++ " /tmp/" ++ repo ){ std_out = CreatePipe }
-      liftIO $ putStrLn "Cloning complete"
+      liftIO $ putStrLn $ "Cloning" ++  show folder
+      (_, Just hout, _, _) <-liftIO $ createProcess (shell $ cloneCmd ++ "&&" ++ commitsCmd){ std_out = CreatePipe } 
+ 
+      commits <- liftIO $ hGetContents hout
+       
+      return $ filter (""/=) (splitOn "\n" $ (last (splitOn "end" commits)))  
+     
       
-    otherwise -> do 
-      liftIO $ putStrLn "Repository was already cloned"
+ 
+  
  
 
-calcCyclomat :: String -> IO (Float)
-calcCyclomat filePath  = do 
+calcCyclomat :: String -> Process (Float)
+calcCyclomat fpath  = do 
   let config = (Config 6 [] [] [] Colored) 
      
   
-  (_, output) <- analyze config filePath
+  (_, output) <-  liftIO $ analyze config fpath
 
   case output of 
     (Left _) -> return 0
@@ -106,34 +117,27 @@ calcCyclomat filePath  = do
   --liftIO $ putStrLn $ "complexity" ++  show avg
   
 
-
--- downloadFile :: String -> IO (Bool)
--- downloadFile url  = do
---     jpg <- get url
---     L.writeFile "master.zip" jpg
---     return True 
---   where
---     get url = case parseURI url of
---                 Nothing -> error $ "Invalid URI: " ++ url
---                 Just _ ->  simpleHttp url   
--- unzipF :: String -> String -> IO()
--- unzipF fname dirPath=  withArchive fname $ do
---     names <- entryNames
---     extractFiles names dirPath
-    
-doWork :: Integer -> Integer
-doWork = numPrimeFactors
+ 
+ 
+doWork :: (String, String, String, String) ->  Process (Float)
+doWork (commitId, fpath, folder, url) = do
+  _ <-getAllCommits url
+  gitCheckout folder commitId 
+  calcCyclomat fpath
 
 -- | worker function.
 -- This is the function that is called to launch a worker. It loops forever, asking for work, reading its message queue
 -- and sending the result of runnning numPrimeFactors on the message content (an integer).
+-- | worker function.
+-- This is the function that is called to launch a worker. It loops forever, asking for work, reading its message queue
+-- and sending the result of runnning numPrimeFactors on the message content (an integer).
 worker :: ( ProcessId  -- The processid of the manager (where we send the results of our work)
-         , ProcessId) -- the process id of the work queue (where we get our work from)
-       -> Process ()
+          , ProcessId) -- the process id of the work queue (where we get our work from)
+          -> Process ()
 worker (manager, workQueue) = do
-    us <- getSelfPid              -- get our process identifier
-    liftIO $ putStrLn $ "Starting worker: " ++ show us
-    go us
+  us <- getSelfPid              -- get our process identifier
+  liftIO $ putStrLn $ "Starting worker: " ++ show us
+  go us
   where
     go :: ProcessId -> Process ()
     go us = do
@@ -144,30 +148,48 @@ worker (manager, workQueue) = do
       -- or else we will be sent (). If there is work, do it, otherwise terminate
       receiveWait
         [ match $ \n  -> do
-            liftIO $ putStrLn $ "[Node " ++ (show us) ++ "] given work: " ++ show n
-            send manager (doWork n)
-            liftIO $ putStrLn $ "[Node " ++ (show us) ++ "] finished work."
-            go us -- note the recursion this function is called again!
+          liftIO $ putStrLn $ "[Node " ++ (show us) ++ "] given work: " -- ++ show n
+          res <- (doWork n)
+          send manager res
+          liftIO $ putStrLn $ "[Node " ++ (show us) ++ "] finished work."
+          go us -- note the recursion this function is called again!
         , match $ \ () -> do
-            liftIO $ putStrLn $ "Terminating node: " ++ show us
-            return ()
+          liftIO $ putStrLn $ "Terminating node: " ++ show us
+          return ()
         ]
-
 remotable ['worker] -- this makes the worker function executable on a remote node
+
+
+
 
 manager :: Integer    -- The number range we wish to generate work for (there will be n work packages)
         -> [NodeId]   -- The set of cloud haskell nodes we will initalise as workers
         -> Process Integer
 manager n workers = do
-  us <- getSelfPid
-
+  us <- getSelfPid 
   -- first, we create a thread that generates the work tasks in response to workers
   -- requesting work.
+  let url = "https://github.com/rubik/argon.git"
+      folder = "/tmp/argon.git" 
+ 
   workQueue <- spawnLocal $ do
     -- Return the next bit of work to be done
-    forM_ [1 .. n] $ \m -> do
-      pid <- expect   -- await a message from a free worker asking for work
-      send pid m     -- send them work
+    
+    
+     
+    allCommits <- getAllCommits url 
+    forM_ (allCommits) $ \commitId -> do
+   
+      gitCheckout folder  commitId
+
+      files <- listFilesDirFiltered folder
+      forM_ files $ \f -> do
+        let (File _ fpath) = f
+        pid <- expect   -- await a message from a free worker asking for work
+        send pid $ (commitId, fpath, folder, url)    -- send them work
+       
+     
+    
 
     -- Once all the work is done tell the workers to terminate. We do this by sending every worker who sends a message
     -- to us a null content: () . We do this only after we have distributed all the work in the forM_ loop above. Note
@@ -205,19 +227,13 @@ rtable = Lib.__remoteTable initRemoteTable
 someFunc :: IO ()
 someFunc = do
   --all <- getDirectoryContents "/home/jibin/workspace/new_Disributed/restful-cyclomatic" 
-  liftIO $ cloneRepo "https://github.com/rubik/argon.git"
-  l <-calcCyclomat "/tmp/argon.git/src/Argon/Parser.hs"
-  putStrLn $ "Result " ++ show l  
-  res <- listFilesDirFiltered "/tmp/argon.git" 
-  putStrLn $ "Result " ++ show res ++ "\n "
-  res <- getAllCommits "/tmp/argon.git" 
-  putStrLn $ "Result " ++ show res ++ "\n "
-  
+   
   args <- getArgs
 
   case args of
     ["manager", host, port, n] -> do
       putStrLn "Starting Node as Manager"
+      --c <- $! cloneRepo "https://github.com/rubik/argon.git"
       backend <- initializeBackend host port rtable
       startMaster backend $ \workers -> do
         result <- manager (read n) workers

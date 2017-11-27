@@ -1,5 +1,11 @@
 flags: {}
 extra-package-dbs: []
+docker:
+  enable: false
+image:  
+  container:
+    name: cyclomatic 
+    base: basecyclomatic
 packages:
 - .
 - location:
