@@ -38,10 +38,9 @@ library
                      , mongoDB
                      , text
                      , resourcet 
-                     , transformers
-                     , pipes-safe
-                     , pipes
-                     , silently
+                     , transformers 
+                     , posix-paths
+
 
   default-language:    Haskell2010
 

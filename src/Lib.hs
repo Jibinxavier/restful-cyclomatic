@@ -35,7 +35,7 @@ import        System.Process
 import        System.IO          
 import        Data.List.Split       
 import        System.FilePath
-import        System.Posix.Files                  
+               
 -- this is the work we get workers to do. It could be anything we want. To keep things simple, we'll calculate the
 -- number of prime factors for the integer passed.
 
