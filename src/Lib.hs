@@ -40,10 +40,6 @@ import        System.Posix.Files
 -- number of prime factors for the integer passed.
 
 
-import qualified Pipes.Prelude as P
-import Pipes
-import Pipes.Safe (runSafeT)
-import System.IO.Silently
 
 import        qualified Data.ByteString as B
 import        qualified Data.ByteString.Lazy as L 
@@ -147,7 +143,7 @@ calcCyclomat fpath  = do
   
 
  
- 
+--liftIO $ putStrLn $ "file path "++ fpath ++ "Sum " ++ show sum1
 doWork :: (String, String, String, String) ->  Process (Integer)
 doWork (commitId, fpath, _, url) = do
   folder <- liftIO $ cloneRepo url 
@@ -157,17 +153,16 @@ doWork (commitId, fpath, _, url) = do
   
    
   (_, output) <-  liftIO $ analyze config fpath
-
+  
   case output of 
-    (Left _) -> return 0
+    (Left e) -> do 
+      liftIO $ putStrLn $ "Error"  ++ show e ++ " file path " ++ fpath
+      return 0
     (Right results) -> do
       let sum1= (sum (map (\(CC (_, _, x)) -> x) results) ) 
           len = length results
-          avg = fromIntegral sum1/ fromIntegral len   
-
-      
-      liftIO $ putStrLn $ "file path "++ fpath ++ "Sum " ++ show sum1
-      return $ fromIntegral sum1
+          avg = fromIntegral sum1/ fromIntegral len    
+        in return $ fromIntegral sum1
  
 
 -- | worker function.
