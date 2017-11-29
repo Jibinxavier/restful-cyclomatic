@@ -4,23 +4,32 @@ import requests
 import json
 import git
 import os
+from requests.exceptions import ConnectionError 
+
+# import lizard
 def send_post_msg(url, data):
+    """
+    """
+
     headers = {'Content-type': 'application/json'}
-     
+    
     return requests.post(url, data=json.dumps(data), headers=headers)
+
+
 
 
 def get_msg(url):
     res = requests.get(url).json()
     
     return json.loads(res["result"])
-
+def git_clone(repoUrl,repo_path):
+    if not os.path.exists(repo_path):
+        git.Git().clone(repoUrl, repo_path)
 def get_all_commits(repoUrl,repo_path): 
     """
         returns a list of git.Commit objects
     """
-    if not os.path.exists(repo_path):
-        git.Git().clone(repoUrl, repo_path)
+    git_clone(repoUrl,repo_path)
     repo = git.Repo(repo_path)
     
     return list(repo.iter_commits())
@@ -64,3 +73,5 @@ def parse_args():
 # test = get_all_commits("https://github.com/cpbuckingham/python.git","/tmp/python")
 # 
 # 
+
+ 

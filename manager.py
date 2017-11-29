@@ -39,6 +39,7 @@ def compile_work(ext=".py"):
                 {"commitid": str(c),
                 "fpath":file,
                 "repo_path": repo_path,
+                "repo_url": REPO_URL,
                 "assigned_time": initial,
                 "completed": False,
                 "worker_addr": "",
@@ -69,7 +70,7 @@ def distribute_work():
     address = request.remote_addr
 
     # need to check if it was already assigned and have not timed out
-    timeout = datetime.datetime.now() - datetime.timedelta(minutes=1)
+    timeout = datetime.datetime.now() - datetime.timedelta(minutes=3)
     work =db.jobs.find_one_and_update({"completed": False,"assigned_time":{"$lt": timeout}},
                                        {"$set": {
                                           "assigned_time":datetime.datetime.now(),
