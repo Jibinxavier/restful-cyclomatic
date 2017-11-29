@@ -1,0 +1,26 @@
+version: '2'
+services:
+  db:
+    image: mongo:3.0.2
+    network_mode: "host"
+  res-master:
+    build: . 
+    image: cyclomatic_complexity
+    depends_on:
+      - db
+    ports:
+      - "8080:8080"
+    container_name: res_master
+    network_mode: "host"
+    command: python manager.py
+
+  worker1:
+    image: cyclomatic_complexity
+    depends_on:
+      - res-master
+    ports:
+      - "8081:8081"
+    network_mode: "host"
+    environment:
+      - port=8081
+    command: python worker.py

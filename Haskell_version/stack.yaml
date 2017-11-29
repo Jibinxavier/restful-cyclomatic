@@ -1,0 +1,27 @@
+flags: {}
+extra-package-dbs: []
+docker:
+  enable: false
+image:  
+  container:
+    name: cyclomatic 
+    base: basecyclomatic
+packages:
+- .
+- location:
+    git: https://github.com/jberryman/directory-tree.git
+    commit: bfd31a37ba4af34ed25b2e55865db8c30b175510
+- location:
+      git: https://github.com/Palmik/bson-generic.git
+      commit: e078def65d0dee1ea7e3205f445e47d5937851f3
+
+extra-deps:
+- argon-0.4.1.0
+- distributed-process-0.6.6
+- distributed-process-simplelocalnet-0.2.3.3
+- hierarchy-0.3.1
+- network-multicast-0.1.2
+- pipes-files-0.1.1
+- posix-paths-0.2.1.0
+- zip-conduit-0.2.2.2 
+resolver: lts-6.3
