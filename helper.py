@@ -68,6 +68,9 @@ def parse_args():
     
 
     return args
+
+ 
+
 #   print(get_all_commits("https://github.com/cpbuckingham/python.git","/tmp/python"))
 
 # test = get_all_commits("https://github.com/cpbuckingham/python.git","/tmp/python")

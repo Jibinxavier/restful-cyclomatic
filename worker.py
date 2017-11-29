@@ -21,6 +21,10 @@ from config import MANAGER_URL
 
 import threading    
 from helper import send_post_msg, get_msg, git_clone, git_checkout
+
+import resource
+
+from requests.exceptions import ConnectionError
 app = Flask(__name__)
 
 def register():
@@ -31,25 +35,39 @@ def register():
     
         try:
             send_post_msg(MANAGER_URL + '/client/register', {})
+            print("completed registration")
             break
         except ConnectionError as e:
+            print("connection refused. Going to sleep")
             time.sleep(5)
 def send_result(data):
     send_post_msg(MANAGER_URL + '/work/result', data)
 
 def __dowork__(config):
-
-    result = {}
-
     
-    print( "Got job "+ config["fpath"] )
+    result = {}
+    start = resource.getrusage(resource.RUSAGE_SELF) # resource metrics
+
+    print("Got job {} Commit id {} ".format(config["fpath"], config["commitid"]))
+ 
     git_clone(config["repo_url"],config["repo_path"])
 
     git_checkout(config["commitid"],config["repo_path"])
     cyclomatic = lizard.analyze_file(config["fpath"]).average_cyclomatic_complexity
 
     result = {"fpath":config["fpath"], 
-                "result": cyclomatic}
+                "result": cyclomatic, 
+                "commitid":config["commitid"]
+                }
+    end =  resource.getrusage(resource.RUSAGE_SELF) #resource metrics
+
+
+    diff_ucpu = now.ru_utime - start.ru_utime
+    print("time in user mode {}".format(diff_ucpu))
+
+    print (resource.getrusage(resource.RUSAGE_THREAD).ru_maxrss / 1024, 'MB')
+    print (resource.getrusage(resource.RUSAGE_THREAD).ru_maxrss / 1024, 'MB')
+    
     send_result(result)  # return result
     
      
@@ -81,6 +99,7 @@ def request_work():
                 __dowork__(data)
              
         except ConnectionError as e:
+            print("connection error going to sleep for 5 seconds")
             time.sleep(5)
         # if data is empty wait work, sleepfor 5 minutes if empty again shutdown
         
@@ -95,17 +114,11 @@ if __name__ == "__main__":
     """
         At the start manager might be slow to start
     """
-   
-    while True:
-        
-        try:
-            register()
-            break
-        except ConnectionError as e:
-            time.sleep(5)
-        
+    
+    register()
     t = threading.Thread(target=request_work, args = ())
     t.daemon = True
     t.start()
-    app.run(host='0.0.0.0', port=os.environ['port'] )
+    port = os.environ.get('port',8090)
+    app.run(host='0.0.0.0', port=port )
     

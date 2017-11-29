@@ -12,15 +12,58 @@ services:
       - "8080:8080"
     container_name: res_master
     network_mode: "host"
+    volumes:
+      - /home/jibin/workspace/new_Disributed/restful-cyclomatic/results:/results
     command: python manager.py
 
   worker1:
+    image: cyclomatic_complexity 
+    depends_on:
+      - res-master
+    ports:
+      - "8083:8083"
+    network_mode: "host"
+    environment:
+      - port=8083
+    command: python worker.py
+  worker2:
     image: cyclomatic_complexity
     depends_on:
       - res-master
     ports:
-      - "8081:8081"
+      - "8082:8082"
     network_mode: "host"
     environment:
-      - port=8081
+      - port=8082
     command: python worker.py
+  worker3:
+    image: cyclomatic_complexity
+    depends_on:
+      - res-master
+    ports:
+      - "8085:8085"
+    network_mode: "host"
+    environment:
+      - port=8085
+    command: python worker.py
+  worker4:
+    image: cyclomatic_complexity
+    depends_on:
+      - res-master
+    ports:
+      - "8084:8084"
+    network_mode: "host"
+    environment:
+      - port=8084
+    command: python worker.py
+  worker5:
+    image: cyclomatic_complexity
+    depends_on:
+      - res-master
+    ports:
+      - "8086:8086"
+    network_mode: "host"
+    environment:
+      - port=8086
+    command: python worker.py
+  
