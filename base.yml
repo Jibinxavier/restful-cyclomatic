@@ -1,0 +1,9 @@
+version: '2'
+
+services:
+  base:
+    environment:
+      - PATTERN=WORK_PUSHING
+      #- PATTERN=WORK_STEALING
+      #- PATTERN=MASTER_SLAVE
+       
