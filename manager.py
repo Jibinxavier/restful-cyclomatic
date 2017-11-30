@@ -199,9 +199,9 @@ if __name__ == '__main__':
     target_func = None 
     # by default work stealing, therefore there
     # is no need to spawn a new thread
-    if sys.argv[1]  == "MASTER_SLAVE":
-        target_func = request_work ####need to change
-    elif sys.argv[1] == "WORK_PUSHING":
+    if os.environ.get("PATTERN") == "MASTER_SLAVE":
+        target_func = push_work ####need to change
+    elif os.environ.get("PATTERN") == "WORK_PUSHING":
         target_func = push_work
     
     if target_func is not None:

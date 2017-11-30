@@ -22,7 +22,7 @@ from config import MANAGER_URL
 
 import threading    
 from helper import send_post_msg, get_msg, git_clone, git_checkout
-
+from concurrent.futures import ThreadPoolExecutor
 import resource
 
 from requests.exceptions import ConnectionError
@@ -139,18 +139,21 @@ if __name__ == "__main__":
     target_func = request_work
     args = ()
     if os.environ.get("PATTERN") == "MASTER_SLAVE":
-        target_func = request_work ####need to change
+        target_func = __do_work__ ####need to change
+        executor = ThreadPoolExecutor(max_workers=100)
+        a = executor.submit(target_func)
     elif os.environ.get("PATTERN") == "WORK_PUSHING":
         target_func = __do_work__
+        t = threading.Thread(target=target_func, args =())
+        t.daemon = True
+        t.start()
     
     else: # by default work stealing
         target_func = request_work
 
 
 
-    t = threading.Thread(target=target_func, args =())
-    t.daemon = True
-    t.start()
+    
     port = os.environ.get('port',8083)
     app.run(host='0.0.0.0', port=port )
     
