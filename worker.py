@@ -7,6 +7,7 @@ import lizard
 import time
 import os
 import sys
+import queue
 from flask import Flask
 from flask import jsonify
 from flask import request
@@ -26,7 +27,7 @@ import resource
 
 from requests.exceptions import ConnectionError
 app = Flask(__name__)
-
+q = queue.Queue()
 def register():
     """
         Send a post request to register with manager
@@ -43,10 +44,10 @@ def register():
 def send_result(data):
     send_post_msg(MANAGER_URL + '/work/result', data)
 
-def __dowork__(config):
+def calc_cyclo(config):
     
     result = {}
-    start = resource.getrusage(resource.RUSAGE_SELF) # resource metrics
+    # start = resource.getrusage(resource.RUSAGE_SELF) # resource metrics
 
     print("Got job {} Commit id {} ".format(config["fpath"], config["commitid"]))
  
@@ -59,14 +60,14 @@ def __dowork__(config):
                 "result": cyclomatic, 
                 "commitid":config["commitid"]
                 }
-    end =  resource.getrusage(resource.RUSAGE_SELF) #resource metrics
+    # end =  resource.getrusage(resource.RUSAGE_SELF) #resource metrics
 
 
-    diff_ucpu = now.ru_utime - start.ru_utime
-    print("time in user mode {}".format(diff_ucpu))
+    # diff_ucpu = end.ru_utime - start.ru_utime
+    # print("time in user mode {}".format(diff_ucpu))
 
-    print (resource.getrusage(resource.RUSAGE_THREAD).ru_maxrss / 1024, 'MB')
-    print (resource.getrusage(resource.RUSAGE_THREAD).ru_maxrss / 1024, 'MB')
+    # print (resource.getrusage(resource.RUSAGE_THREAD).ru_maxrss / 1024, 'MB')
+    # print (resource.getrusage(resource.RUSAGE_THREAD).ru_maxrss / 1024, 'MB')
     
     send_result(result)  # return result
     
@@ -75,6 +76,7 @@ def __dowork__(config):
 
 def request_work():
     """
+        Work-Stealing pattern worker, asks for work
         this may have to be separate thread
         dont want to block the main app
     """ 
@@ -82,8 +84,8 @@ def request_work():
     while True:
      
         try:
-            data = get_msg(MANAGER_URL + '/client/work')
-            if data is None:
+            config = get_msg(MANAGER_URL + '/client/work')
+            if config is None:
                 print("No job")
                 no_work_timeout-=1
 
@@ -96,7 +98,7 @@ def request_work():
                 time.sleep(2)
 
             else :
-                __dowork__(data)
+                calc_cyclo(config)
              
         except ConnectionError as e:
             print("connection error going to sleep for 5 seconds")
@@ -104,10 +106,28 @@ def request_work():
         # if data is empty wait work, sleepfor 5 minutes if empty again shutdown
         
         
-     
+def __do_work__():
+    timeout = 10
+    while True: 
+        if q.empty():
+            timeout -=1
+            time.sleep(5) 
+            if timeout == 0:
+                break 
+        else:
+            timeout = 10
+            config = q.get()
+            calc_cyclo(config)
+
 @app.route('/client/dowork', methods=['POST'])
 def dowork():
-    pass
+    """
+        populate the queue 
+    """
+    data = request.get_json(force=True)
+    q.put(data)
+
+    return jsonify({})
 
 
 if __name__ == "__main__":
@@ -116,9 +136,21 @@ if __name__ == "__main__":
     """
     
     register()
-    t = threading.Thread(target=request_work, args = ())
+    target_func = request_work
+    args = ()
+    if os.environ.get("PATTERN") == "MASTER_SLAVE":
+        target_func = request_work ####need to change
+    elif os.environ.get("PATTERN") == "WORK_PUSHING":
+        target_func = __do_work__
+    
+    else: # by default work stealing
+        target_func = request_work
+
+
+
+    t = threading.Thread(target=target_func, args =())
     t.daemon = True
     t.start()
-    port = os.environ.get('port',8090)
+    port = os.environ.get('port',8083)
     app.run(host='0.0.0.0', port=port )
     

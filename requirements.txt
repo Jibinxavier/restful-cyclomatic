@@ -2,4 +2,5 @@ pymongo
 flask_pymongo
 gitpython
 requests
-lizard 
+lizard
+pyyaml
