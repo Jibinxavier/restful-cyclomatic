@@ -17,4 +17,4 @@ res = db.jobs.aggregate([
     { "$group": { "_id": {},"max": { "$max": "$assigned_time" },"min": { "$min": "$assigned_time" } 
     }}
 ])
-# print(list(res)) 
+print(len(list(db.workers.find({}))) )

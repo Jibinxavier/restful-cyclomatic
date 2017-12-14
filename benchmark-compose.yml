@@ -1,0 +1,32 @@
+services:
+  db:
+    image: mongo:3.0.2
+    network_mode: host
+  res-master:
+    build: .
+    command: python manager.py
+    container_name: res_master
+    depends_on:
+    - db
+    environment:
+    - PATTERN=WORK_STEALING
+    - REPO=https://github.com/cpbuckingham/python.git
+    image: cyclomatic_complexity
+    network_mode: host
+    ports:
+    - 8080:8080
+    volumes:
+    - /home/jibin/workspace/new_Disributed/restful-cyclomatic/results:/results
+  worker0:
+    command: python worker.py
+    depends_on:
+    - res-master
+    environment:
+    - PATTERN=WORK_STEALING
+    - REPO=https://github.com/cpbuckingham/python.git
+    - port=8000
+    image: cyclomatic_complexity
+    network_mode: host
+    ports:
+    - 8000:8000
+version: '2'

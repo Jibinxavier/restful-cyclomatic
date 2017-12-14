@@ -11,16 +11,14 @@ import queue
 from flask import Flask
 from flask import jsonify
 from flask import request
-from pymongo import MongoClient
-
-
+from pymongo import MongoClient 
 from flask import Flask
 from flask_pymongo import PyMongo
-
+import threading 
 import requests
 from config import MANAGER_URL
 
-import threading    
+   
 from helper import send_post_msg, get_msg, git_clone, git_checkout
 from concurrent.futures import ThreadPoolExecutor
 import resource
@@ -35,7 +33,7 @@ def register():
     while True:
     
         try:
-            send_post_msg(MANAGER_URL + '/client/register', {})
+            send_post_msg(MANAGER_URL + '/client/register', {"port": os.environ.get('port',8083)})
             print("completed registration")
             break
         except ConnectionError as e:
@@ -118,6 +116,13 @@ def __do_work__():
             timeout = 10
             config = q.get()
             calc_cyclo(config)
+def __master_slave__():
+    target_func = __do_work__
+    t = threading.Thread(target=target_func, args =())
+    t.daemon = True
+    t.start()
+    
+
 
 @app.route('/client/dowork', methods=['POST'])
 def dowork():
@@ -126,7 +131,7 @@ def dowork():
     """
     data = request.get_json(force=True)
     q.put(data)
-
+   
     return jsonify({})
 
 
@@ -139,21 +144,37 @@ if __name__ == "__main__":
     target_func = request_work
     args = ()
     if os.environ.get("PATTERN") == "MASTER_SLAVE":
-        target_func = __do_work__ ####need to change
-        executor = ThreadPoolExecutor(max_workers=100)
+        target_func = __do_work__ 
+        executor = ThreadPoolExecutor(max_workers=1000)
         a = executor.submit(target_func)
     elif os.environ.get("PATTERN") == "WORK_PUSHING":
         target_func = __do_work__
         t = threading.Thread(target=target_func, args =())
         t.daemon = True
         t.start()
-    
+   
     else: # by default work stealing
         target_func = request_work
-
+        t = threading.Thread(target=target_func, args =())
+        t.daemon = True
+        t.start()
+    # if os.environ.get("PATTERN") == "WORK_STEALING":
+    #     target_func = request_work
+    #     t = threading.Thread(target=target_func, args =())
+    #     t.daemon = True
+    #     t.start()
+    # elif os.environ.get("PATTERN") == "WORK_PUSHING":
+    #     target_func = __do_work__
+    #     t = threading.Thread(target=target_func, args =())
+    #     t.daemon = True
+    #     t.start()
+   
+    # by default it is master slave
+        
+    
 
 
     
     port = os.environ.get('port',8083)
-    app.run(host='0.0.0.0', port=port )
+    app.run(host='0.0.0.0', port=int(port) )
     

@@ -1,86 +1,80 @@
-version: '2'
 services:
   db:
     image: mongo:3.0.2
-    network_mode: "host"
+    network_mode: host
   res-master:
-    build: . 
-    image: cyclomatic_complexity
-    depends_on:
-      - db
-    extends:
-      file: base.yml
-      service: base 
-    ports:
-      - "8080:8080"
+    build: .
+    command: python manager.py
     container_name: res_master
-    network_mode: "host"
+    depends_on:
+    - db
+    environment:
+    - PATTERN=MASTER_SLAVE
+    - REPO=https://github.com/cpbuckingham/python.git
+    image: cyclomatic_complexity
+    network_mode: host
+    ports:
+    - 8080:8080
     volumes:
-      - /home/jibin/workspace/new_Disributed/restful-cyclomatic/results:/results
-    command: python manager.py WORK_PUSHING
-    
-  worker1:
-    image: cyclomatic_complexity 
-    depends_on:
-      - res-master
-    ports:
-      - "8083:8083"
-    network_mode: "host"
-    environment:
-      - port=8083
+    - /home/jibin/workspace/new_Disributed/restful-cyclomatic/results:/results
+  worker0:
     command: python worker.py
-    extends:
-      file: base.yml
-      service: base
-  worker2:
+    depends_on:
+    - res-master
+    environment:
+    - PATTERN=MASTER_SLAVE
+    - REPO=https://github.com/cpbuckingham/python.git
+    - port=8000
     image: cyclomatic_complexity
-    depends_on:
-      - res-master
+    network_mode: host
     ports:
-      - "8082:8082"
-    network_mode: "host"
-    environment:
-      - port=8082
-    command: python worker.py
-    extends:
-      file: base.yml
-      service: base
-  worker3:
-    image: cyclomatic_complexity
-    depends_on:
-      - res-master
-    ports:
-      - "8085:8085"
-    network_mode: "host"
-    environment:
-      - port=8085
-    command: python worker.py
-    extends:
-      file: base.yml
-      service: base
-  worker4:
-    image: cyclomatic_complexity
-    depends_on:
-      - res-master
-    ports:
-      - "8084:8084"
-    network_mode: "host"
-    environment:
-      - port=8084
-    command: python worker.py
-    extends:
-      file: base.yml
-      service: base
-  worker5:
-    image: cyclomatic_complexity
-    depends_on:
-      - res-master
-    ports:
-      - "8086:8086"
-    network_mode: "host"
-    environment:
-      - port=8086
-    command: python worker.py
-    extends:
-      file: base.yml
-      service: base
+    - 8000:8000
+  # worker1:
+  #   command: python worker.py
+  #   depends_on:
+  #   - res-master
+  #   environment:
+  #   - PATTERN=MASTER_SLAVE
+  #   - REPO=https://github.com/cpbuckingham/python.git
+  #   - port=8001
+  #   image: cyclomatic_complexity
+  #   network_mode: host
+  #   ports:
+  #   - 8001:8001
+  # worker2:
+  #   command: python worker.py
+  #   depends_on:
+  #   - res-master
+  #   environment:
+  #   - PATTERN=MASTER_SLAVE
+  #   - REPO=https://github.com/cpbuckingham/python.git
+  #   - port=8002
+  #   image: cyclomatic_complexity
+  #   network_mode: host
+  #   ports:
+  #   - 8002:8002
+  # worker3:
+  #   command: python worker.py
+  #   depends_on:
+  #   - res-master
+  #   environment:
+  #   - PATTERN=MASTER_SLAVE
+  #   - REPO=https://github.com/cpbuckingham/python.git
+  #   - port=8003
+  #   image: cyclomatic_complexity
+  #   network_mode: host
+  #   ports:
+  #   - 8003:8003
+  # worker4:
+  #   command: python worker.py
+  #   depends_on:
+  #   - res-master
+  #   environment:
+  #   - PATTERN=MASTER_SLAVE
+  #   - REPO=https://github.com/cpbuckingham/python.git
+  #   - port=8004
+  #   image: cyclomatic_complexity
+  #   network_mode: host
+  #   ports:
+  #   - 8004:8004
+version: '2'

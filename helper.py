@@ -136,9 +136,4 @@ def worker_node_ports(base="docker-compose.yml"):
             print(exc)
 
     return ports
-#   print(get_all_commits("https://github.com/cpbuckingham/python.git","/tmp/python"))
-
-# test = get_all_commits("https://github.com/cpbuckingham/python.git","/tmp/python")
-# 
-# 
 

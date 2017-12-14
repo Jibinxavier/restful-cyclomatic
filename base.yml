@@ -5,5 +5,7 @@ services:
     environment:
       #- PATTERN=WORK_PUSHING
       #- PATTERN=WORK_STEALING
-      - PATTERN=MASTER_SLAVE
+       
+      - PATTERN=${PATTERN}
+      - REPO=${REPO}
        
