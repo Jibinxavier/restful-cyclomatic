@@ -20,14 +20,14 @@ The client continously makes get requests asking for task and the manager picks 
 The manager will assign woker will assign the work to someone else if the result wasnt returned within a threshold.
 
 -  This is pattern is advantageous when the manager is not able to predict how long will a node take to complete a task and assign task accordingly. <sup>1</sup>
-- It also away achieving load balancing
-- In this experiment however work stealing was not slower than work push and master slave. This is probably because of the latency in communicating. The server has to respond to request for tasks and also results. Therefore, the communication can get queued up.
+- It also away to achieve load balancing
+- In this experiment however work stealing was not slower than work push and master slave. This is due to the latency in communicating. The server has to respond to request for tasks and also results. Therefore, the communication can get queued up.
 
 
 #### Work Pushing (WP)
 Here the master pushes all the work to the client's queue. The worker then takes one by one, computes and sends the result back.
 
-- Work pushing seems to be the best-performing. This is due to less congestion at the server, as the tasks are pushed to the workers queue. Rather than workers asking which in turn creates a lot more traffic.
+- From the graph WP seems to be the best-performing. This is due to less congestion at the server, as the tasks are pushed to the workers queue. Rather than workers asking which in turn creates a lot more traffic.
 
 
 #### Master Slave (MS)
