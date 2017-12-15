@@ -41,12 +41,10 @@ For the master slave pattern. The manager sends the task to the worker (tuple).T
 
 
 
-Things that affect the performance:
-not running on proper node 
-Since Docker shares the host resource
+ 
 https://docs.docker.com/engine/faq/
 
-By default the pattern is work stealing
+ 
 
 #### Improvements
 - More accurate 
